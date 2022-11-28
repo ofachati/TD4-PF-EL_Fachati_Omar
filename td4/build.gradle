@@ -1,0 +1,51 @@
+// Pour ceux qui utilisent vscode
+// il est possible que pour que cela compile
+// vous deviez lancer ./gradlew eclipseJdt
+// une première fois avant d'importer le projet dans l'IDE.
+// Sinon comme d'habitude, ./gradlew run
+plugins {
+    id 'java'
+    id 'application'
+    id 'eclipse'
+}
+
+// on utilise les records de Java
+// utiliser une version suffisante
+// attention, la syntaxe peut changer entre les versions tant que non définitive
+sourceCompatibility = JavaVersion.VERSION_18
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation 'org.testng:testng:7.6.1'
+    implementation "org.apache.logging.log4j:log4j-api:2.19.0"
+    implementation "org.apache.logging.log4j:log4j-core:2.19.0"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.1" 
+}
+
+application {
+    // mainClassName = 'promowarn.version1.App' // à tester
+    // mainClassName = 'promowarn.version2.App' // à tester
+    mainClassName = 'promowarn.version3.App' // à réaliser
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += '--enable-preview'
+}
+tasks.withType(Test) {
+    jvmArgs += "--enable-preview"
+}
+tasks.withType(JavaExec) {
+    jvmArgs += "--enable-preview"
+}
+
+eclipse.jdt.file.withProperties { props ->
+    props['org.eclipse.jdt.core.compiler.problem.enablePreviewFeatures']= 'enabled'
+    props['org.eclipse.jdt.core.compiler.problem.reportPreviewFeatures']= 'ignore'
+}
+
+test {
+    useTestNG()
+}
