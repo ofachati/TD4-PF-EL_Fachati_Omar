@@ -7,11 +7,10 @@ import promowarn.common.mail.*;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import promowarn.version3.DataProvider;
-import promowarn.version3.Faculty;
-import promowarn.version3.Promotion;
-import promowarn.version3.PromotionWithDelegate;
-import promowarn.version3.Student;
+
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.function.BiFunction;
 
 public class App {
     private static final Logger LOGGER = LogManager.getLogger(promowarn.version3.App.class.getName());
@@ -26,33 +25,41 @@ public class App {
 
 
 
+
+    
+  
+
+
     //change : optional<double> n= e.grade()
     //regerder sis c'est pa sune boitre vide
     //if(!n.isEmpty()) Sum+= n.get()
     //n++
 
-
-    //Promotion -> s<Etudiant>
-    // S<Optional<Double>>     : on doit flat mapper ca ?????
-    // filter -> S<Optionale<Double>>  :)))))
-    //map -> S<Double> :))))))))
-    private static Double average(final promowarn.version3.Promotion p) {
-        double sum = 0.0;
-        int nb = 0;
-        for (final Student e : p.students()) {
-            sum += e.grade();
-            nb++;
-        }
-        return sum / nb;
+    //change : optional<double> n= e.grade()
+    //regerder sis c'est pa sune boitre vide
+    //if(!n.isEmpty()) Sum+= n.get()
+    //n++
+    private static OptionalDouble average(final Promotion p) {
+        return p.students().stream()
+                .filter(std -> std!=null)
+                .mapToDouble(std -> std.grade())
+                .average();
     }
 
+    private static final BiFunction<Promotion, Double, String> bifunc =
+            (p, avg) -> avg < 10 ? koMessage(p, avg) : okMessage(p, avg);
+
     private static String alertTitle(final Promotion p) {
-        final double avg = average(p);
-        return avg < 10 ? koMessage(p, avg) : okMessage(p, avg);
+        final OptionalDouble avg = average(p);
+
     }
 
     private static EMailAddress delegateEMail(final PromotionWithDelegate p) {
-        return p.delegate().email();
+        Optional<Student> delegate = p.delegate();
+        if (delegate != null)
+            return delegate.email();
+        else
+            return null;
     }
 
     private static Pair<EMailCategory, EMail> createEMail(final promowarn.version3.PromotionWithDelegate p) {
